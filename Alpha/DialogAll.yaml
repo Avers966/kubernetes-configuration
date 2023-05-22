@@ -1,0 +1,165 @@
+kind: Secret
+apiVersion: v1
+metadata:
+  name: microservice-dialog
+  namespace: skillbox-alpha
+data:
+  DB_HOST: cG9zdGdyZXMtc2VydmljZQ==
+  DB_NAME: c2tpbGxib3g=
+  DB_PASSWORD: ZGlhbG9n
+  DB_SCHEMA: ZGlhbG9n
+  DB_USERNAME: ZGlhbG9n
+type: Opaque
+
+
+
+---
+
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: microservice-dialog
+  namespace: skillbox-alpha
+
+data:
+  application.yml: |-
+
+    server:
+      port: 8080
+
+    spring:
+      liquibase:
+        enabled: true
+        drop-first: false
+        change-log: classpath:database-dialog-changelog.xml
+        default_schema: dialog
+
+      datasource:
+        url: jdbc:postgresql://postgres-service:5432/skillbox
+        username: dialog
+        password: dialog
+        driverClassName: org.postgresql.Driver
+
+      jpa:
+        show-sql: false
+        hibernate:
+          ddl-auto: none
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.PostgreSQL10Dialect
+            format_sql: true
+            default_schema: dialog
+        open-in-view: false
+
+    kafka:
+      bootstrap-servers: kafka-statefulset-0.kafka-svc.kafka.svc.cluster.local:9092
+      consumer:
+        group-id: dialog.1
+        concurrency: 3
+        max.poll.interval.ms: 1000  
+        spring.json.trusted.packages: ru.skillbox.diplom.group35.*
+      producer:
+        retries: 3
+      topic:
+        partition-count: 3
+        replication-factor: 1
+        reply: t.dialog.message.out
+        request: t.dialog.message.in
+
+    logging:
+      level:
+        org.springframework: info
+        org.apache.kafka.clients.producer: ERROR
+        
+        
+        
+---
+
+
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: microservice-dialog
+  namespace: skillbox-alpha
+  labels:
+    app: microservice-dialog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: microservice-dialog
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: microservice-dialog
+    spec:
+      volumes:
+        - name: microservice-dialog
+          configMap:
+            name: microservice-dialog
+            items:
+              - key: application.yml
+                path: application.yml
+            defaultMode: 420
+      containers:
+        - name: app
+          image: alphateam35/microservice-dialog:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: JAVA_OPTIONS
+              value: '-Xms128m -Xmx256m -Xss512k'
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: microservice-dialog
+                  key: DB_HOST
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: microservice-dialog
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: microservice-dialog
+                  key: DB_PASSWORD
+          resources:
+            limits:
+              cpu: 300m
+              memory: 450Mi
+            requests:
+              cpu: 200m
+              memory: 256Mi
+          volumeMounts:
+            - name: microservice-dialog
+              mountPath: /app/config
+
+
+
+---
+
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: microservice-dialog
+  namespace: skillbox-alpha
+
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      nodePort: 32288
+  selector:
+    app: microservice-dialog
+  type: NodePort
+
+
+
+
