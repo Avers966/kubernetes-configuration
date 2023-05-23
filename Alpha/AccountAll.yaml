@@ -3,25 +3,21 @@ apiVersion: v1
 metadata:
   name: microservice-account
   namespace: skillbox-alpha
-data:
-  DB_HOST: cG9zdGdyZXMtc2VydmljZQ==
-  DB_NAME: c2tpbGxib3g=
-  DB_PASSWORD: YWNjb3VudA==
-  DB_SCHEMA: YWNjb3VudA==
-  DB_USERNAME: YWNjb3VudA==
-  PG_ADMIN: c2tpbGxib3g=
-  PG_ADMIN_PASSWORD: c2tpbGxib3g=
-type: Opaque
+stringData:
+  DB_HOST: "postgres-service"
+  DB_PASSWORD: "account"
+  DB_SCHEMA: "account"
+  DB_USERNAME: "account"
+  PG_ADMIN: "skillbox"
+  PG_ADMIN_PASSWORD: "skillbox"
+  DB_NAME: "skillbox"
 
 ---
 
-
-kind: ConfigMap
 apiVersion: v1
+kind: ConfigMap
 metadata:
   name: microservice-account
-  namespace: skillbox-alpha
-
 data:
   application.yml: |-
 
@@ -56,11 +52,10 @@ data:
         url: http://microservice-account
     logging:
       level:
-        org.springframework: info   
+        org.springframework: info    
 
 
 ---
-
 
 kind: Deployment
 apiVersion: apps/v1
@@ -76,7 +71,6 @@ spec:
       app: microservice-account
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: microservice-account
     spec:
@@ -87,7 +81,6 @@ spec:
             items:
               - key: application.yml
                 path: application.yml
-            defaultMode: 420
       containers:
         - name: app
           image: alphateam35/microservice-account:latest
@@ -123,26 +116,18 @@ spec:
             - name: microservice-account
               mountPath: /app/config
 
-
-
 ---
 
-
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: microservice-account
   namespace: skillbox-alpha
-
 spec:
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
-      nodePort: 30717
   selector:
     app: microservice-account
-
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
   type: NodePort
-
-
