@@ -5,10 +5,10 @@ metadata:
 stringData:
   DB_USERNAME: friend
   DB_PASSWORD: friend
-  DB_HOST: postgres-service
+  DB_HOST: postgres-service:5432
   DB_SCHEMA: friend
   DB_DATABASE: skillbox
-  REDIS_PASS: skillbox
+  
   
   
 ---
@@ -32,7 +32,7 @@ data:
         change-log: classpath:database-friend-changelog.xml
 
       datasource:
-        url: jdbc:postgresql://${DB_HOST}:5432/${DB_DATABASE}
+        url: jdbc:postgresql://${DB_HOST}/${DB_DATABASE}
         username: ${DB_USERNAME}
         password: ${DB_PASSWORD}
         driverClassName: org.postgresql.Driver
