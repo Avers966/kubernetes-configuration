@@ -1,25 +1,67 @@
-kind: Secret
 apiVersion: v1
+kind: Secret
 metadata:
   name: microservice-admin-console
-  namespace: skillbox-alpha
-data:
-  CLOUDINARY_KEY: NDM5NTQyMzEyMjQzODI5
-  CLOUDINARY_NAME: ZGEwd3I5eTUx
-  CLOUDINARY_SECRET: RmtQRkdKRFhHWkFjM001SXFtSWJGQ1FMWFF3
-  DB_HOST: cG9zdGdyZXMtc2VydmljZQ==
-  DB_NAME: c2tpbGxib3g=
-  DB_PASSWORD: YWRtaW4tY29uc29sZQ==
-  DB_SCHEMA: YWRtaW4tY29uc29sZQ==
-  DB_USERNAME: YWRtaW4tY29uc29sZQ==
-type: Opaque
-
-
+stringData:
+  DB_HOST: "postgres-service"
+  DB_PASSWORD: "admin-console"
+  DB_SCHEMA: "admin-console"
+  DB_USERNAME: "admin-console"
+  DB_NAME: "skillbox"
+  CLOUDINARY_NAME: "da0wr9y51"
+  CLOUDINARY_KEY: "439542312243829"
+  CLOUDINARY_SECRET: "FkPFGJDXGZAc3M5IqmIbFCQLXQw"
 
 ---
 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: microservice-admin-console
+data:
+  application.yml: |-
 
+    server:
+      port: 8080
 
+    spring:
+      liquibase:
+        enabled: true
+        drop-first: false
+        change-log: classpath:database-admin-console-changelog.xml
+        default_schema: admin_console
+
+      datasource:
+        url: jdbc:postgresql://postgres-service:5432/skillbox
+        username: admin-console
+        password: admin-console
+        driverClassName: org.postgresql.Driver
+
+      jpa:
+        show-sql: false
+        hibernate:
+          ddl-auto: none
+        properties:
+          hibernate:
+            dialect: org.hibernate.dialect.PostgreSQL10Dialect
+            format_sql: true
+            default_schema: admin_console
+        open-in-view: false
+
+      servlet:
+        multipart:
+          enabled: true
+          max-file-size: 3MB
+          max-request-size: 10MB
+          resolve-lazily: true
+
+    cloudinary:
+      config:
+        cloud_name: da0wr9y51
+        api_key: 439542312243829
+        api_secret: FkPFGJDXGZAc3M5IqmIbFCQLXQw
+
+---
 
 kind: Deployment
 apiVersion: apps/v1
@@ -35,11 +77,8 @@ spec:
       app: microservice-admin-console
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: microservice-admin-console
-      annotations:
-        kubectl.kubernetes.io/restartedAt: '2023-05-17T14:51:16+03:00'
     spec:
       volumes:
         - name: microservice-admin-console
@@ -48,7 +87,6 @@ spec:
             items:
               - key: application.yml
                 path: application.yml
-            defaultMode: 420
       containers:
         - name: app
           image: alphateam35/microservice-admin-console:latest
@@ -83,25 +121,21 @@ spec:
           volumeMounts:
             - name: microservice-admin-console
               mountPath: /app/config
-
-
-
+          imagePullPolicy: Always
 
 ---
 
-
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: microservice-admin-console
   namespace: skillbox-alpha
 spec:
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
-      nodePort: 30288
   selector:
     app: microservice-admin-console
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
   type: NodePort
 

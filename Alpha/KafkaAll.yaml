@@ -1,72 +1,67 @@
-kind: StatefulSet
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kafka
+---
+
 apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   name: kafka-statefulset
   namespace: kafka
   labels:
     app: kafka-cluster
 spec:
+  serviceName: kafka-svc
   replicas: 1
   selector:
     matchLabels:
       app: kafka-cluster
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: kafka-cluster
     spec:
       containers:
         - name: kafka-container
-          image: bitnami/kafka:latest
+          image: 'bitnami/kafka:latest'
           ports:
             - containerPort: 9092
-              protocol: TCP
             - containerPort: 9093
-              protocol: TCP
             - containerPort: 9094
-              protocol: TCP
           env:
             - name: KAFKA_BROKER_ID
-              value: '1'
+              value: "1"
             - name: KAFKA_CFG_NODE_ID
-              value: '1'
+              value: "1"
             - name: KAFKA_ENABLE_KRAFT
-              value: 'yes'
+              value: "yes"
             - name: KAFKA_CFG_PROCESS_ROLES
-              value: broker,controller
+              value: "broker,controller"
             - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
-              value: CONTROLLER
+              value: "CONTROLLER"
             - name: KAFKA_CFG_LISTENERS
-              value: >-
-                CLIENT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9094
+              value: "CLIENT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9094"
             - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
-              value: CONTROLLER:PLAINTEXT,CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+              value: "CONTROLLER:PLAINTEXT,CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT"
             - name: KAFKA_CFG_INTER_BROKER_LISTENER_NAME
-              value: CLIENT
+              value: "CLIENT"
             - name: KAFKA_CFG_ADVERTISED_LISTENERS
-              value: >-
-                CLIENT://kafka-statefulset-0.kafka-svc.kafka.svc.cluster.local:9092,EXTERNAL://82.202.214.42:9094
+              value: "CLIENT://kafka-statefulset-0.kafka-svc.kafka.svc.cluster.local:9092,EXTERNAL://82.202.214.42:9094"
             - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
-              value: 1@127.0.0.1:9093
+              value: "1@127.0.0.1:9093"
             - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
-              value: 'true'
+              value: "true"
             - name: KAFKA_DEFAULT_REPLICATION_FACTOR
-              value: '1'
+              value: "1"
             - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
-              value: '1'
+              value: "1"
             - name: ALLOW_PLAINTEXT_LISTENER
-              value: 'yes'
-  
-
-
-  
+              value: "yes"
 ---
 
-
-
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: kafka-svc
   namespace: kafka
@@ -74,22 +69,18 @@ metadata:
     app: kafka-cluster
 spec:
   ports:
-    - protocol: TCP
-      port: 9092
+    - port: 9092
+      protocol: TCP
       targetPort: 9092
       nodePort: 30092
   selector:
     app: kafka-cluster
   type: NodePort
-
-
-
-
+  
 ---
 
-
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: kafka-svc-ext
   namespace: kafka
@@ -97,12 +88,10 @@ metadata:
     app: kafka-cluster
 spec:
   ports:
-    - protocol: TCP
-      port: 9094
+    - port: 9094
+      protocol: TCP
       targetPort: 9094
       nodePort: 30094
   selector:
     app: kafka-cluster
   type: NodePort
-
-

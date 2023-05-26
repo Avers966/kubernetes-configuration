@@ -1,27 +1,23 @@
-kind: Secret
 apiVersion: v1
+kind: Secret
 metadata:
   name: microservice-dialog
   namespace: skillbox-alpha
-data:
-  DB_HOST: cG9zdGdyZXMtc2VydmljZQ==
-  DB_NAME: c2tpbGxib3g=
-  DB_PASSWORD: ZGlhbG9n
-  DB_SCHEMA: ZGlhbG9n
-  DB_USERNAME: ZGlhbG9n
-type: Opaque
-
-
+stringData:
+  DB_HOST: "postgres-service"
+  DB_PASSWORD: "dialog"
+  DB_SCHEMA: "dialog"
+  DB_USERNAME: "dialog"
+  DB_NAME: "skillbox"
 
 ---
 
 
-kind: ConfigMap
 apiVersion: v1
+kind: ConfigMap
 metadata:
   name: microservice-dialog
   namespace: skillbox-alpha
-
 data:
   application.yml: |-
 
@@ -66,17 +62,22 @@ data:
         replication-factor: 1
         reply: t.dialog.message.out
         request: t.dialog.message.in
+        
+    springdoc:
+      api-docs:
+        enabled: true
+        path: '/api/v1/dialogs/v3/api-docs'
+      swagger-ui:
+        path: '/api/v1/dialogs/swagger-ui'
+        doc-expansion: none
+        disable-swagger-default-url: true
 
     logging:
       level:
         org.springframework: info
         org.apache.kafka.clients.producer: ERROR
         
-        
-        
 ---
-
-
 
 kind: Deployment
 apiVersion: apps/v1
@@ -92,7 +93,6 @@ spec:
       app: microservice-dialog
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: microservice-dialog
     spec:
@@ -103,7 +103,6 @@ spec:
             items:
               - key: application.yml
                 path: application.yml
-            defaultMode: 420
       containers:
         - name: app
           image: alphateam35/microservice-dialog:latest
@@ -138,26 +137,22 @@ spec:
           volumeMounts:
             - name: microservice-dialog
               mountPath: /app/config
-
-
+          imagePullPolicy: Always
 
 ---
 
-
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
   name: microservice-dialog
   namespace: skillbox-alpha
-
 spec:
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8080
-      nodePort: 32288
   selector:
     app: microservice-dialog
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
   type: NodePort
 
 
