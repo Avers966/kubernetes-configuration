@@ -134,7 +134,13 @@ spec:
               secretKeyRef:
                 name: microservice-geo
                 key: REDIS_HOST       
-
+        resources:
+            limits:
+              cpu: 300m
+              memory: 450Mi
+            requests:
+              cpu: 200m
+              memory: 256Mi 
 
 
 ---
