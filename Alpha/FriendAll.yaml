@@ -54,7 +54,16 @@ data:
       kafka:
         consumer:
             group-id: event.1
-        bootstrap-servers: kafka-statefulset-0.kafka-svc.kafka.svc.cluster.local:9092
+        bootstrap-servers: 82.202.214.42:9092
+        
+    springdoc:
+      api-docs:
+        enabled: true
+        path: '/api/v1/friend/v3/api-docs'
+      swagger-ui:
+        path: '/api/v1/friend/swagger-ui'
+        doc-expansion: none
+        disable-swagger-default-url: true        
 
 
 ---
