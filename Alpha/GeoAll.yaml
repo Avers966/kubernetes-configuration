@@ -26,9 +26,8 @@ data:
       boot:
         admin:
           client:
-            enabled: true
-            instance:
-              service-url: http://microservice-geo:8080
+            enabled: false
+
 
       liquibase:
         enabled: true
@@ -64,6 +63,15 @@ data:
       data:
         redis:
           repositories.enabled: false
+          
+    springdoc:
+        api-docs:
+          enabled: true
+          path: '/api/v1/geo/v3/api-docs'
+        swagger-ui:
+          path: '/api/v1/geo/swagger-ui'
+          doc-expansion: none
+          disable-swagger-default-url: true          
     
     geo-settings:
       countries:
