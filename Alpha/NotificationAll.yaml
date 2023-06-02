@@ -57,6 +57,15 @@ data:
 
       autoconfigure:
         exclude:    org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+        
+    springdoc:
+      api-docs:
+        enabled: true
+        path: '/api/v1/notification/v3/api-docs'
+      swagger-ui:
+        path: '/api/v1/notification/swagger-ui'
+        doc-expansion: none
+        disable-swagger-default-url: true        
 
 
 

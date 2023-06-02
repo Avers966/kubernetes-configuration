@@ -59,9 +59,9 @@ data:
     springdoc:
       api-docs:
         enabled: true
-        path: '/api/v1/friend/v3/api-docs'
+        path: '/api/v1/friends/v3/api-docs'
       swagger-ui:
-        path: '/api/v1/friend/swagger-ui'
+        path: '/api/v1/friends/swagger-ui'
         doc-expansion: none
         disable-swagger-default-url: true        
 
