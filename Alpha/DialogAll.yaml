@@ -75,7 +75,7 @@ data:
     logging:
       level:
         org.springframework: info
-        org.apache.kafka.clients.producer: ERROR
+        org.apache.kafka: WARN
         
 ---
 
